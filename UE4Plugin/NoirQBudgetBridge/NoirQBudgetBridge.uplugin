@@ -1,0 +1,27 @@
+{
+	"FileVersion" : 3,
+	"Version" : 1,
+	"VersionName" : "1.0",
+	"FriendlyName" : "Budget Bridge",
+	"Description" : "Supports reading a json file containing transform matrix and redirect, then palces said redirect actrrror at matrix.",
+	"Category" : "NoirQBudgetBridge",
+	"CreatedBy" : "Ben Halling",
+	"CreatedByURL" : "http://www.noirq.com",
+	"DocsURL" : "",
+	"MarketplaceURL" : "",
+	"SupportURL" : "",
+	"EnabledByDefault" : false,
+	"CanContainContent" : false,
+	"IsBetaVersion" : false,
+	"Installed" : false,
+	"Modules" :
+	[
+		{
+			"Name" : "NoirQBudgetBridge",
+			"Type" : "Editor",
+      "LoadingPhase": "Default",
+      "Enabled": false
+		}
+	]
+
+}
