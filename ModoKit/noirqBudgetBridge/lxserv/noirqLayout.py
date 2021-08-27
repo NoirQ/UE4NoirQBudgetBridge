@@ -6,6 +6,58 @@ import lxu
 import lxifc
 import os
 
+class AddRedirectChannelCMD(lxu.command.BasicCommand):
+    def __init__(self):
+        lxu.command.BasicCommand.__init__(self)
+        self.dyna_Add ('redirect', lx.symbol.sTYPE_STRING)
+        self.dyna_Add ('item', "&item")
+    def cmd_Flags(self):
+        return lx.symbol.fCMD_UNDO
+    def basic_Enable(self, msg):
+        return True
+    def basic_Execute(self, msg, flags):
+        addItem = None
+        items = []
+        if self.dyna_IsSet(1):
+            inItem = self.dyna_String(1, "")
+            scn = lxu.select.SceneSelection ().current ()
+            MyItem = None
+            if scn is None:
+                return
+            try:
+                MyItem = modo.Item(scn.ItemLookupIdent (inItem))
+                items.append(MyItem)
+            except:
+                lx.out("ident failed")
+
+        redirectValue = self.dyna_String(0, "")
+        if not redirectValue:
+            return
+        for item in items:
+            if not (item.channel("noirqRedirect")):
+                lx.eval("channel.create noirqRedirect string username:noirqRedirect item:{}".format(item.Ident()))
+            channel = item.channel("noirqRedirect")
+            channel.set(redirectValue)
+
+class AddRedirectChannelSelectedCMD(lxu.command.BasicCommand):
+    def __init__(self):
+        lxu.command.BasicCommand.__init__(self)
+        self.dyna_Add ('redirect', lx.symbol.sTYPE_STRING)
+    def cmd_Flags(self):
+        return lx.symbol.fCMD_UNDO
+    def basic_Enable(self, msg):
+        return True
+    def basic_Execute(self, msg, flags):
+        items = modo.Scene().selected
+        redirectValue = self.dyna_String(0, "")
+        if not redirectValue:
+            return
+        if len(items) == 0:
+            lx.eval("?noirqLayout.addChannel {}".format(redirectValue))
+        else:
+            for item in items:
+                lx.eval("noirqLayout.addChannel {0} {1}".format(redirectValue,item.Ident()))
+
 class replicatorVisitor(lxifc.Visitor):
     def __init__(self):
         self.repEnum = None
@@ -17,7 +69,8 @@ class replicatorVisitor(lxifc.Visitor):
         mOri = modo.Matrix4(ori)
         mOri.transpose() # this comes out flipped for some reason, so flip it back.
         m = modo.Matrix4(mOri, pos)
-        self.allItems.append(m)
+        item = self.repEnum.Item()
+        self.allItems.append((m, item))
 
 
 class ExportLayoutCMD(lxu.command.BasicCommand):
@@ -34,9 +87,7 @@ class ExportLayoutCMD(lxu.command.BasicCommand):
 
     def handleReplicator(self, item):
         srvScene = lx.service.Scene()
-        print item
         e = srvScene.GetReplicatorEnumerator(item)
-        print e
         srvSel = lx.service.Selection()
         scene = lxu.select.SceneSelection().current()
         time = srvSel.GetTime ()
@@ -111,21 +162,28 @@ class ExportLayoutCMD(lxu.command.BasicCommand):
             worldId = item.ChannelLookup(lx.symbol.sICHAN_XFRMCORE_WORLDMATRIX)
             itype = srvScn.ItemTypeLookup("replicator")
             tdItem = modo.Item(item)
+            bIsReplicator = False
             if item.IsA(itype):
                 localItems = self.handleReplicator(item)
+                bIsReplicator = True
             else:
                 matrixObject = tdItem.channel('worldMatrix').get()
                 matrix = modo.Matrix4(matrixObject)
-                localItems.append(matrix)
+                localItems.append((matrix, None))
             replicatorIdx = 0
             for matrix in localItems:
-                ueMat = convertToUEMatrix(matrix)
+                ueMat = convertToUEMatrix(matrix[0])
                 assetRedirect = ""
+                myItem = item if matrix[1] is None else matrix[1]
                 try:
-                    assetRedirectId = item.ChannelLookup("noirqRedirect")
-                    assetRedirect = read.String(item, assetRedirectId)
+                    assetRedirectId =  -1
+                    assetRedirectId = myItem.ChannelLookup("noirqRedirect")
+                    if assetRedirectId == -1 and bIsReplicator:
+                        myItem = item
+                        assetRedirectId = myItem.ChannelLookup("noirqRedirect")
+                    assetRedirect = read.String(myItem, assetRedirectId)
                 except:
-                    print ("no redirect found")
+                    print ("no redirect found for {}".format(item.Name()))
 
                 name = item.UniqueName()
                 if replicatorIdx > 0:
@@ -147,14 +205,24 @@ class ExportLayoutCMD(lxu.command.BasicCommand):
         json_object = json.dumps(layoutDict, indent = 4)
           
         # Writing to sample.json
-        outpath = lx.eval("user.value noirqLayout.filePath ?")
-        asPath = os.path.join(outpath)
+        outpath = lx.eval("preset.project.settings ?")
+        if outpath is "":
+            msg = lx.object.Message(msg)
+            msg.SetCode(lx.result.FAILED)
+            lx.out("File path blank")
+            return lx.symbol.e_FAILED
+
+        fileName = lx.eval("user.value noirqLayout.fileName ?")
+        asPath = os.path.join(outpath, fileName)
+
+        if not os.path.exists(outpath):
+            msg = lx.object.Message(msg)
+            msg.SetCode(lx.result.FAILED)
+            lx.out("File path missing {}".format(outpath))
+            return lx.symbol.e_FAILED            
 
         with open(asPath, "w") as outfile:
-            outfile.write(json_object)
-
-
-        
+            outfile.write(json_object)        
         
 
 def convertToUEMatrix(inMatrix4):
@@ -215,6 +283,7 @@ def convertToUEMatrix(inMatrix4):
 
 
 lx.bless(ExportLayoutCMD, "noirqLayout.save")
-    
+lx.bless(AddRedirectChannelCMD, "noirqLayout.addChannel")    
+lx.bless(AddRedirectChannelSelectedCMD, "noirqLayout.addChannelSelected")    
 
 

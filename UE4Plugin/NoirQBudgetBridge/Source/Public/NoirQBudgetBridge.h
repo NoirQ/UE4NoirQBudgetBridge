@@ -13,6 +13,7 @@
 #if WITH_EDITOR
 #define LOCTEXT_NAMESPACE "NoirQBudgetBridge"
 #define STUBLOC "NoirQBudgetBridge"
+#define NOIRQ_BUTTONNAME "Budget Bridge"
 #define STUBLOCTOOLTIP "NoirQBudgetBridge_Tooltip"
 #endif
 

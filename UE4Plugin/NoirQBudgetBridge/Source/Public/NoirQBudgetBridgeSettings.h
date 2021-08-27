@@ -23,7 +23,7 @@ public:
 	FString testString;*/
 
 	UPROPERTY(EditAnywhere, config, Category = Custom)
-	FString LoadLayoutPath;
+	FString LoadLayoutName;
 
 	
 };

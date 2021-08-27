@@ -97,7 +97,7 @@ void FNoirQBudgetBridge::AddMyToolbarExtension(FToolBarBuilder& ToolbarBuilder)
 		ToolbarBuilder.AddComboButton(
 			FUIAction(),
 			FOnGetContent::CreateRaw(this,&FNoirQBudgetBridge::GenerateToolbarMenuWidget),
-			LOCTEXT(STUBLOC, STUBLOC),
+			LOCTEXT(STUBLOC, NOIRQ_BUTTONNAME),
 			LOCTEXT(STUBLOCTOOLTIP, STUBLOC),
 			FSlateIcon(FNoirQBudgetBridgeStyle::Get()->GetStyleSetName(), "NoirQBudgetBridgeStyle.Icon"),
 			false);
@@ -189,19 +189,20 @@ void FNoirQBudgetBridge::ExtendTestButton()
 
 void FNoirQBudgetBridge::LoadLayoutFile()
 {
-	FString LayoutFilePath;
+	FString LayoutFilePath, LayoutFileName;
 	UNoirQBudgetBridgeSettings* Settings = GetMutableDefault<UNoirQBudgetBridgeSettings>();
 
-	LayoutFilePath = Settings->LoadLayoutPath;
-	if (LayoutFilePath.IsEmpty())
+	LayoutFileName = Settings->LoadLayoutName;
+	FString filename = "BridgeFile.json";
+	if (LayoutFileName.IsEmpty())
 	{
-		FString projectContentDir = FPaths::ProjectContentDir();
-		FString fullDir = projectContentDir + "/BudgetBridge/BridgeFile.json";
-		LayoutFilePath = fullDir;
+		LayoutFileName = filename;
 	}
-
-
-
+	
+	FString projectContentDir = FPaths::ProjectDir();
+	FString fullDir = projectContentDir + "/" + LayoutFileName;
+	LayoutFilePath = fullDir;
+	
 	// https://stackoverflow.com/questions/52516942/how-to-parse-array-of-array-in-a-json-file-in-c-using-unreal
 	FString jsonAsString;
 	FFileHelper::LoadFileToString(jsonAsString, *LayoutFilePath);

@@ -18,4 +18,6 @@ private:
 private:
 
 	static TSharedPtr< class FSlateStyleSet > StyleSet;
+
+	static FName GetStyleSetName();
 };

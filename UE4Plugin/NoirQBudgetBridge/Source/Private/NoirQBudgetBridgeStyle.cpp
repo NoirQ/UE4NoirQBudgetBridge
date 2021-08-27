@@ -14,6 +14,13 @@ FString FNoirQBudgetBridgeStyle::InContent(const FString& RelativePath, const AN
 }
 
 TSharedPtr< FSlateStyleSet > FNoirQBudgetBridgeStyle::StyleSet = NULL;
+
+FName FNoirQBudgetBridgeStyle::GetStyleSetName()
+{
+	static FName StyleName("Budget Bridge");
+	return StyleName;
+}
+
 TSharedPtr< class ISlateStyle > FNoirQBudgetBridgeStyle::Get() { return StyleSet; }
 
 void FNoirQBudgetBridgeStyle::Initialize()
@@ -34,6 +41,7 @@ void FNoirQBudgetBridgeStyle::Initialize()
 	{
 		StyleSet->Set("NoirQBudgetBridgeStyle.Icon", new IMAGE_BRUSH("Icon40", Icon40x40));
 	}
+
 
 	FSlateStyleRegistry::RegisterSlateStyle(*StyleSet.Get());
 }

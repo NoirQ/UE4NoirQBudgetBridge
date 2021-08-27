@@ -6,6 +6,9 @@ namespace UnrealBuildTool.Rules
 	{
 		public NoirQBudgetBridge(ReadOnlyTargetRules Target) : base (Target)
 		{
+
+			PrivatePCHHeaderFile = "Private/NoirQBudgetBridgePrivatePCH.h";
+
 			PublicIncludePaths.AddRange(
 				new string[] {
 					// ... add public include paths required here ...
@@ -14,7 +17,6 @@ namespace UnrealBuildTool.Rules
 
 			PrivateIncludePaths.AddRange(
 				new string[] {
-					"Developer/NoirQBudgetBridge/Private",
 					// ... add other private include paths required here ...
 				}
 				);

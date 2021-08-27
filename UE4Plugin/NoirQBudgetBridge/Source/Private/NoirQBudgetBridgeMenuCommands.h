@@ -9,8 +9,8 @@ public:
 		(
 			"NoirQBudgetBridge",
 			NSLOCTEXT("Contexts", "NoirQBudgetBridge", "NoirQBudgetBridge"),
-			NAME_None, // "MainFrame" // @todo Fix this crash
-			FEditorStyle::GetStyleSetName() // Icon Style Set
+			NAME_None,
+			FNoirQBudgetBridgeCommands::GetStyleSetName() // Icon Style Set
 			)
 	{}
 
